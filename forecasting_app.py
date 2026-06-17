@@ -29,80 +29,107 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# ── Color palette (matches Regression Analyst dark theme) ────────────────────
-DARK   = '#0d1117'
-PANEL  = '#161b22'
-GRID   = '#30363d'
-WHITE  = '#e6edf3'
-GRAY   = '#8b949e'
-BLUE   = '#58a6ff'
-GREEN  = '#3fb950'
-RED    = '#f85149'
-YELLOW = '#d29922'
-PURPLE = '#bc8cff'
-PINK   = '#f778ba'
+# ── Color palette — light theme ───────────────────────────────────────────────
+DARK   = '#ffffff'        # main background
+PANEL  = '#f6f8fa'        # card / plot background
+GRID   = '#d0d7de'        # grid lines
+WHITE  = '#1f2328'        # main text (dark on light)
+GRAY   = '#57606a'        # secondary text
+BLUE   = '#0969da'        # primary accent
+GREEN  = '#1a7f37'        # green
+RED    = '#cf222e'        # red
+YELLOW = '#9a6700'        # amber/gold
+PURPLE = '#6639ba'        # purple
+PINK   = '#bf3989'        # pink
 
-# ── CSS ───────────────────────────────────────────────────────────────────────
+# ── CSS — light theme ─────────────────────────────────────────────────────────
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;700&display=swap');
 
 html, body, [class*="css"] { font-family: 'DM Sans', sans-serif; }
-.stApp { background: linear-gradient(135deg, #0d1117 0%, #161b22 100%); color: #e6edf3; }
-h1,h2,h3 { font-family: 'Space Mono', monospace; color: #e6edf3; }
+.stApp { background: #f6f8fa !important; color: #1f2328; }
+h1,h2,h3 { font-family: 'Space Mono', monospace; color: #1f2328; }
 
-[data-testid="stMetricValue"] { color: #e6edf3 !important; }
-[data-testid="stMetricLabel"] { color: #8b949e !important; }
-.stDataFrame td, .stDataFrame th { color: #e6edf3 !important; background: #161b22 !important; }
-.stSelectbox div[data-baseweb="select"] { background: #161b22 !important; color: #e6edf3 !important; }
-.stMultiSelect div[data-baseweb="select"] { background: #161b22 !important; color: #e6edf3 !important; }
-div[data-baseweb="option"] { background: #161b22 !important; color: #e6edf3 !important; }
-div[data-baseweb="popover"] { background: #161b22 !important; }
-.stTextInput input, .stTextArea textarea { color: #e6edf3 !important; background: #161b22 !important; }
-div[data-testid="stSidebar"] { background: #161b22 !important; border-right: 1px solid #30363d; }
+/* Metrics */
+[data-testid="stMetricValue"] { color: #1f2328 !important; }
+[data-testid="stMetricLabel"] { color: #57606a !important; }
 
+/* Tables */
+.stDataFrame td, .stDataFrame th { color: #1f2328 !important; background: #ffffff !important; }
+
+/* Inputs */
+.stSelectbox div[data-baseweb="select"] { background: #ffffff !important; color: #1f2328 !important; }
+.stMultiSelect div[data-baseweb="select"] { background: #ffffff !important; color: #1f2328 !important; }
+div[data-baseweb="option"] { background: #ffffff !important; color: #1f2328 !important; }
+div[data-baseweb="popover"] { background: #ffffff !important; }
+.stTextInput input, .stTextArea textarea { color: #1f2328 !important; background: #ffffff !important; }
+div[data-testid="stSidebar"] { background: #ffffff !important; border-right: 1px solid #d0d7de; }
+
+/* Expander */
+div[data-testid="stExpander"] { background: #ffffff; border: 1px solid #d0d7de; border-radius: 8px; }
+div[data-testid="stExpander"] summary { color: #1f2328 !important; }
+
+/* Number inputs */
+.stNumberInput input { color: #1f2328 !important; background: #ffffff !important; }
+
+/* Hero */
 .hero-title {
     font-family:'Space Mono',monospace; font-size:2.2rem; font-weight:700;
-    background:linear-gradient(90deg,#58a6ff,#bc8cff,#f778ba);
+    background:linear-gradient(90deg,#0969da,#6639ba,#bf3989);
     -webkit-background-clip:text; -webkit-text-fill-color:transparent; line-height:1.2;
 }
-.hero-sub { color:#8b949e; font-size:1rem; margin-bottom:1.5rem; }
+.hero-sub { color:#57606a; font-size:1rem; margin-bottom:1.5rem; }
 
+/* Section headers — larger number, bolder */
 .section-hdr {
-    font-family:'Space Mono',monospace; font-size:0.72rem; text-transform:uppercase;
-    letter-spacing:2px; color:#58a6ff; margin-bottom:0.8rem;
-    border-bottom:1px solid #21262d; padding-bottom:0.5rem;
+    font-family:'Space Mono',monospace; font-size:0.78rem; text-transform:uppercase;
+    letter-spacing:2px; color:#0969da; margin-bottom:0.8rem;
+    border-bottom:2px solid #d0d7de; padding-bottom:0.5rem; font-weight:700;
 }
-.card { background:#161b22; border:1px solid #30363d; border-radius:12px; padding:1.2rem 1.4rem; margin-bottom:1rem; }
-.card-accent { border-left:4px solid #58a6ff; }
+.section-hdr .sec-num {
+    font-size:1.1rem; font-weight:900; margin-right:4px; color:#0969da;
+}
 
+/* Cards */
+.card { background:#ffffff; border:1px solid #d0d7de; border-radius:12px; padding:1.2rem 1.4rem; margin-bottom:1rem; }
+.card-accent { border-left:4px solid #0969da; }
+
+/* Badges */
 .badge { display:inline-block; padding:2px 10px; border-radius:20px; font-size:0.72rem;
          font-weight:600; font-family:'Space Mono',monospace; margin-right:4px; }
-.badge-blue   { background:#1f3a5f; color:#58a6ff; }
-.badge-green  { background:#1a3a2a; color:#3fb950; }
-.badge-yellow { background:#3a2d10; color:#d29922; }
-.badge-red    { background:#3d1f1f; color:#f85149; }
-.badge-purple { background:#2d1f5f; color:#bc8cff; }
+.badge-blue   { background:#dbeafe; color:#0969da; }
+.badge-green  { background:#dcfce7; color:#1a7f37; }
+.badge-yellow { background:#fef9c3; color:#9a6700; }
+.badge-red    { background:#fee2e2; color:#cf222e; }
+.badge-purple { background:#ede9fe; color:#6639ba; }
 
-.warn-box { background:#2a1f0a; border:1px solid #d29922; border-radius:8px; padding:0.9rem 1.1rem; margin:0.5rem 0; color:#d29922; font-size:0.88rem; }
-.ok-box   { background:#0a2a14; border:1px solid #3fb950; border-radius:8px; padding:0.9rem 1.1rem; margin:0.5rem 0; color:#3fb950; font-size:0.88rem; }
-.err-box  { background:#2a0a0a; border:1px solid #f85149; border-radius:8px; padding:0.9rem 1.1rem; margin:0.5rem 0; color:#f85149; font-size:0.88rem; }
-.info-box { background:#0a1a2a; border:1px solid #58a6ff; border-radius:8px; padding:0.9rem 1.1rem; margin:0.5rem 0; color:#a8d8ff; font-size:0.88rem; }
+/* Alert boxes */
+.warn-box { background:#fffbeb; border:1px solid #d97706; border-radius:8px; padding:0.9rem 1.1rem; margin:0.5rem 0; color:#92400e; font-size:0.88rem; }
+.ok-box   { background:#f0fdf4; border:1px solid #16a34a; border-radius:8px; padding:0.9rem 1.1rem; margin:0.5rem 0; color:#14532d; font-size:0.88rem; }
+.err-box  { background:#fef2f2; border:1px solid #dc2626; border-radius:8px; padding:0.9rem 1.1rem; margin:0.5rem 0; color:#991b1b; font-size:0.88rem; }
+.info-box { background:#eff6ff; border:1px solid #3b82f6; border-radius:8px; padding:0.9rem 1.1rem; margin:0.5rem 0; color:#1e40af; font-size:0.88rem; }
 
+/* Interpret box */
 .interpret-box {
-    background:#1c2333; border:1px solid #58a6ff; border-radius:10px;
-    padding:1.1rem 1.3rem; margin:0.8rem 0; color:#e6edf3;
+    background:#f0f6ff; border:1px solid #0969da; border-radius:10px;
+    padding:1.1rem 1.3rem; margin:0.8rem 0; color:#1f2328;
     font-size:0.88rem; line-height:1.8;
 }
 
+/* Buttons */
 .stButton>button {
-    background:linear-gradient(90deg,#1f3a5f,#2d4a7a); color:#58a6ff; border:1px solid #58a6ff;
+    background:linear-gradient(90deg,#dbeafe,#ede9fe); color:#0969da; border:1px solid #0969da;
     border-radius:8px; font-family:'Space Mono',monospace; font-weight:700;
     padding:0.5rem 1.2rem; transition:all 0.2s;
 }
-.stButton>button:hover { background:linear-gradient(90deg,#2d4a7a,#3a5a9a); opacity:0.9; }
+.stButton>button:hover { background:linear-gradient(90deg,#bfdbfe,#ddd6fe); opacity:0.9; }
 
-div[data-testid="stExpander"] { background:#161b22; border:1px solid #30363d; border-radius:8px; }
+/* Download / sidebar sample buttons */
+.sample-dl-btn { margin-bottom:4px; }
+
+/* Divider */
+hr { border-color:#d0d7de !important; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -297,15 +324,15 @@ def style_ax(ax, title='', xlabel='', ylabel=''):
     ax.tick_params(colors=GRAY, labelsize=8)
     for spine in ax.spines.values():
         spine.set_color(GRID)
-    ax.grid(True, color=GRID, linewidth=0.5, alpha=0.6)
+    ax.grid(True, color=GRID, linewidth=0.5, alpha=0.8)
 
 
 def new_fig(nrows=1, ncols=1, figsize=(10, 4), **kw):
     fig, axes = plt.subplots(nrows, ncols, figsize=figsize, **kw)
-    fig.patch.set_facecolor(DARK)
+    fig.patch.set_facecolor(DARK)          # white figure background
     if isinstance(axes, np.ndarray):
         for ax in axes.flatten():
-            ax.set_facecolor(PANEL)
+            ax.set_facecolor(PANEL)        # very light gray plot area
     else:
         axes.set_facecolor(PANEL)
     return fig, axes
@@ -552,77 +579,102 @@ st.markdown('<div class="hero-sub">Tải lên một file Excel/CSV chứa chuỗ
              'và đưa ra dự báo kèm phân tích.</div>', unsafe_allow_html=True)
 
 with st.sidebar:
-    st.markdown('<div class="section-hdr">① TẢI DỮ LIỆU</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-hdr"><span class="sec-num">①</span> TẢI DỮ LIỆU</div>', unsafe_allow_html=True)
     uploaded_file = st.file_uploader("Chọn file Excel hoặc CSV", type=["xlsx", "xls", "csv"])
 
-    # ── Sample data downloads ───────────────────────────────────────────────
-    with st.expander("📂 Tải file dữ liệu mẫu"):
-        st.markdown("**📦 Dữ liệu mẫu theo phương pháp**")
+    # ── Pre-load sample file bytes once at startup ──────────────────────────
+    SAMPLE_DEFS = [
+        # (key, display_label, path, filename, mime)
+        ("additive",    "🏠 Doanh số đồ gia dụng (Additive)",
+         "/mnt/user-data/uploads/01_Doanh_so_do_gia_dung_Additive.xlsx",
+         "Doanh_so_do_gia_dung_Additive.xlsx",
+         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),
+        ("multiplicative", "⚡ Sản lượng điện (Multiplicative)",
+         "/mnt/user-data/uploads/02_San_luong_dien_Multiplicative.xlsx",
+         "San_luong_dien_Multiplicative.xlsx",
+         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),
+        ("regression",  "🏢 Giá thuê văn phòng (Regression)",
+         "/mnt/user-data/uploads/03_Gia_thue_van_phong_Regression.xlsx",
+         "Gia_thue_van_phong_Regression.xlsx",
+         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),
+        ("covid",       "✈️ Khách du lịch – có COVID (Dữ liệu xáo trộn)",
+         "/mnt/user-data/uploads/04_Khach_du_lich_Messy_COVID.xlsx",
+         "Khach_du_lich_Messy_COVID.xlsx",
+         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),
+        ("airpassengers", "🛫 Air Passengers (Box-Jenkins kinh điển)",
+         "/mnt/user-data/uploads/AirPassengers.csv",
+         "AirPassengers.csv", "text/csv"),
+        ("dailytemp",   "🌡️ Daily Min Temperatures (Melbourne)",
+         "/mnt/user-data/uploads/daily-min-temperatures.csv",
+         "daily-min-temperatures.csv", "text/csv"),
+        ("multireg",    "📈 Time Series Regression Dataset (nhiều biến X)",
+         "/mnt/user-data/uploads/Time_Series_Regression_Dataset.xlsx",
+         "Time_Series_Regression_Dataset.xlsx",
+         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),
+    ]
 
-        SAMPLE_FILES = [
-            # (label, path, filename, mime)
-            ("🏠 Doanh số đồ gia dụng (Additive)",
-             "/mnt/user-data/uploads/01_Doanh_so_do_gia_dung_Additive.xlsx",
-             "Doanh_so_do_gia_dung_Additive.xlsx",
-             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),
-            ("⚡ Sản lượng điện (Multiplicative)",
-             "/mnt/user-data/uploads/02_San_luong_dien_Multiplicative.xlsx",
-             "San_luong_dien_Multiplicative.xlsx",
-             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),
-            ("🏢 Giá thuê văn phòng (Regression)",
-             "/mnt/user-data/uploads/03_Gia_thue_van_phong_Regression.xlsx",
-             "Gia_thue_van_phong_Regression.xlsx",
-             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),
-            ("✈️ Khách du lịch – có COVID (Dữ liệu xáo trộn)",
-             "/mnt/user-data/uploads/04_Khach_du_lich_Messy_COVID.xlsx",
-             "Khach_du_lich_Messy_COVID.xlsx",
-             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),
-        ]
-        for label, fpath, fname, mime in SAMPLE_FILES:
+    if 'sample_bytes' not in st.session_state:
+        st.session_state['sample_bytes'] = {}
+        for key, _, path, fname, _ in SAMPLE_DEFS:
             try:
-                with open(fpath, "rb") as f:
-                    st.download_button(label=label, data=f.read(), file_name=fname,
-                                       mime=mime, use_container_width=True, key=f"dl_{fname}")
+                with open(path, "rb") as f:
+                    st.session_state['sample_bytes'][key] = f.read()
             except Exception:
-                st.caption(f"⚠ Không tìm thấy: {fname}")
+                st.session_state['sample_bytes'][key] = None
 
-        st.markdown("**🌍 Dữ liệu quốc tế (CSV)**")
-        CSV_FILES = [
-            ("🛫 Air Passengers – Hành khách hàng không (Box-Jenkins kinh điển)",
-             "/mnt/user-data/uploads/AirPassengers.csv",
-             "AirPassengers.csv"),
-            ("🌡️ Daily Min Temperatures – Nhiệt độ tối thiểu hàng ngày (Melbourne)",
-             "/mnt/user-data/uploads/daily-min-temperatures.csv",
-             "daily-min-temperatures.csv"),
+    # ── Sample data expander ────────────────────────────────────────────────
+    with st.expander("📂 Dữ liệu mẫu — tải về hoặc chạy luôn"):
+        GROUPS = [
+            ("📦 Dữ liệu mẫu theo phương pháp",
+             ["additive", "multiplicative", "regression", "covid"]),
+            ("🌍 Dữ liệu quốc tế (CSV)",
+             ["airpassengers", "dailytemp"]),
+            ("📊 Dữ liệu hồi quy đa biến",
+             ["multireg"]),
         ]
-        for label, fpath, fname in CSV_FILES:
-            try:
-                with open(fpath, "rb") as f:
-                    st.download_button(label=label, data=f.read(), file_name=fname,
-                                       mime="text/csv", use_container_width=True, key=f"dl_{fname}")
-            except Exception:
-                st.caption(f"⚠ Không tìm thấy: {fname}")
+        sample_map = {k: (lbl, fname, mime)
+                      for k, lbl, _, fname, mime in SAMPLE_DEFS}
 
-        st.markdown("**📊 Dữ liệu hồi quy đa biến**")
-        try:
-            with open("/mnt/user-data/uploads/Time_Series_Regression_Dataset.xlsx", "rb") as f:
-                st.download_button(
-                    label="📈 Time Series Regression Dataset (nhiều biến X)",
-                    data=f.read(),
-                    file_name="Time_Series_Regression_Dataset.xlsx",
-                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                    use_container_width=True,
-                    key="dl_regression",
-                )
-        except Exception:
-            st.caption("⚠ Không tìm thấy file hồi quy đa biến.")
+        for group_title, keys in GROUPS:
+            st.markdown(f"**{group_title}**")
+            for key in keys:
+                lbl, fname, mime = sample_map[key]
+                data = st.session_state['sample_bytes'].get(key)
+                if data is None:
+                    st.markdown(
+                        f'<div style="color:#cf222e;font-size:0.8rem;padding:2px 0">⚠ File không có sẵn trên server này: {fname}</div>',
+                        unsafe_allow_html=True)
+                    continue
+                col_dl, col_run = st.columns([1, 1])
+                with col_dl:
+                    st.download_button(
+                        label="⬇ Tải về",
+                        data=data, file_name=fname, mime=mime,
+                        use_container_width=True, key=f"dl_{key}",
+                        help=lbl,
+                    )
+                with col_run:
+                    if st.button("▶ Chạy luôn", key=f"run_{key}",
+                                 use_container_width=True, help=f"Phân tích {lbl} ngay"):
+                        st.session_state['sample_run_key'] = key
+                        st.session_state['sample_run_bytes'] = data
+                        st.session_state['sample_run_name'] = fname
+                st.caption(lbl)
+
+    # Inject sample file as uploaded_file if user clicked "Chạy luôn"
+    if uploaded_file is None and st.session_state.get('sample_run_bytes'):
+        import io as _io
+        _fake = _io.BytesIO(st.session_state['sample_run_bytes'])
+        _fake.name = st.session_state['sample_run_name']
+        uploaded_file = _fake
 
 if uploaded_file is None:
     st.markdown("""
     <div class="info-box">
     👋 Hãy tải lên một file dữ liệu chuỗi thời gian (ví dụ: doanh số theo tháng, chỉ số FTSE, sản lượng khai thác...).<br><br>
     App hoạt động với file có ít nhất <b>một cột ngày/tháng</b> và <b>một cột giá trị số</b>.
-    Các cột ngày kiểu <code>2000 JAN</code>, <code>2000-01</code>, hoặc dạng ngày chuẩn đều được hỗ trợ.
+    Các cột ngày kiểu <code>2000 JAN</code>, <code>2000-01</code>, hoặc dạng ngày chuẩn đều được hỗ trợ.<br><br>
+    💡 Hoặc bấm <b>▶ Chạy luôn</b> trên một file mẫu ở sidebar bên trái để xem demo ngay.
     </div>
     """, unsafe_allow_html=True)
     st.stop()
@@ -633,7 +685,7 @@ if df is None or df.empty:
     st.stop()
 
 with st.sidebar:
-    st.markdown('<div class="section-hdr">② CHỌN CỘT</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-hdr"><span class="sec-num">②</span> CHỌN CỘT</div>', unsafe_allow_html=True)
     auto_date_col, auto_value_cols = auto_detect_columns(df)
     all_cols = df.columns.tolist()
     date_col = st.selectbox("Cột thời gian (ngày/tháng)", all_cols,
@@ -651,7 +703,7 @@ if len(series_raw) < 24:
 auto_period, auto_freq = infer_period_and_freq(series_raw.index)
 
 with st.sidebar:
-    st.markdown('<div class="section-hdr">③ THIẾT LẬP DỰ BÁO</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-hdr"><span class="sec-num">③</span> THIẾT LẬP DỰ BÁO</div>', unsafe_allow_html=True)
     period = st.number_input("Chu kỳ mùa vụ (s)", min_value=1, max_value=365, value=int(auto_period),
                               help="Số kỳ trong một chu kỳ mùa vụ — 12 cho dữ liệu tháng, 4 cho dữ liệu quý.")
     horizon = st.number_input("Số kỳ dự báo (horizon)", min_value=1, max_value=60, value=int(period))
@@ -660,15 +712,15 @@ with st.sidebar:
                          index=['MS', 'M', 'QS', 'Q', 'W', 'D', 'AS'].index(auto_freq) if auto_freq in ['MS', 'M', 'QS', 'Q', 'W', 'D', 'AS'] else 0,
                          help="Tần suất của chuỗi thời gian — ảnh hưởng đến cách tạo trục thời gian trong dự báo.")
     st.markdown("""
-    <div style="background:#111827;border:1px solid #30363d;border-radius:8px;padding:0.7rem 0.9rem;font-size:0.78rem;color:#8b949e;margin-top:0.3rem;">
-    <b style="color:#58a6ff;">Giải thích viết tắt Freq:</b><br>
-    <b style="color:#e6edf3;">MS</b> — Month Start: đầu mỗi tháng (phổ biến nhất)<br>
-    <b style="color:#e6edf3;">M</b> &nbsp;— Month End: cuối mỗi tháng<br>
-    <b style="color:#e6edf3;">QS</b> — Quarter Start: đầu mỗi quý (Q1=T1, Q2=T4...)<br>
-    <b style="color:#e6edf3;">Q</b> &nbsp;— Quarter End: cuối mỗi quý<br>
-    <b style="color:#e6edf3;">W</b> &nbsp;— Weekly: mỗi tuần (chủ nhật)<br>
-    <b style="color:#e6edf3;">D</b> &nbsp;— Daily: mỗi ngày<br>
-    <b style="color:#e6edf3;">AS</b> — Annual Start: đầu mỗi năm
+    <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:0.7rem 0.9rem;font-size:0.78rem;color:#1e40af;margin-top:0.3rem;">
+    <b style="color:#0969da;">Giải thích viết tắt Freq:</b><br>
+    <b>MS</b> — Month Start: đầu mỗi tháng (phổ biến nhất)<br>
+    <b>M</b> &nbsp;— Month End: cuối mỗi tháng<br>
+    <b>QS</b> — Quarter Start: đầu mỗi quý (Q1=T1, Q2=T4...)<br>
+    <b>Q</b> &nbsp;— Quarter End: cuối mỗi quý<br>
+    <b>W</b> &nbsp;— Weekly: mỗi tuần (chủ nhật)<br>
+    <b>D</b> &nbsp;— Daily: mỗi ngày<br>
+    <b>AS</b> — Annual Start: đầu mỗi năm
     </div>
     """, unsafe_allow_html=True)
 
@@ -686,7 +738,7 @@ PLABEL = PERIOD_LABELS.get(period, 'Kỳ')
 # ══════════════════════════════════════════════════════════════════════════════
 # SECTION 1 — DATA OVERVIEW
 # ══════════════════════════════════════════════════════════════════════════════
-st.markdown('<div class="section-hdr">① TỔNG QUAN DỮ LIỆU</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-hdr"><span class="sec-num">①</span> TỔNG QUAN DỮ LIỆU</div>', unsafe_allow_html=True)
 
 c1, c2, c3, c4 = st.columns(4)
 c1.metric("Số quan sát", len(series))
@@ -719,7 +771,7 @@ st.divider()
 # ══════════════════════════════════════════════════════════════════════════════
 # SECTION 2 — DECOMPOSITION
 # ══════════════════════════════════════════════════════════════════════════════
-st.markdown('<div class="section-hdr">② PHÂN RÃ CHUỖI THỜI GIAN (DECOMPOSITION)</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-hdr"><span class="sec-num">②</span> PHÂN RÃ CHUỖI THỜI GIAN (DECOMPOSITION)</div>', unsafe_allow_html=True)
 
 decomp = run_decompositions(series, period)
 valid_modes = [m for m in ['additive', 'multiplicative'] if decomp[m]['status'] == 'ok']
@@ -769,7 +821,7 @@ st.divider()
 # ══════════════════════════════════════════════════════════════════════════════
 # SECTION 3 — SEASONAL PLOT
 # ══════════════════════════════════════════════════════════════════════════════
-st.markdown('<div class="section-hdr">③ BIỂU ĐỒ MÙA VỤ THEO NĂM</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-hdr"><span class="sec-num">③</span> BIỂU ĐỒ MÙA VỤ THEO NĂM</div>', unsafe_allow_html=True)
 
 pivot, xlabel = seasonal_pivot(series, period)
 fig, ax = new_fig(figsize=(11, 4))
@@ -798,7 +850,7 @@ st.divider()
 # ══════════════════════════════════════════════════════════════════════════════
 # SECTION 4 — EXPONENTIAL SMOOTHING (4 HOLT-WINTERS MODELS)
 # ══════════════════════════════════════════════════════════════════════════════
-st.markdown('<div class="section-hdr">④ SAN BẰNG SỐ MŨ — HOLT-WINTERS (4 MÔ HÌNH)</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-hdr"><span class="sec-num">④</span> SAN BẰNG SỐ MŨ — HOLT-WINTERS (4 MÔ HÌNH)</div>', unsafe_allow_html=True)
 
 with st.spinner("Đang chạy 4 mô hình Holt-Winters..."):
     hw_results = run_hw_models(series, period)
@@ -829,7 +881,7 @@ best_idx = [r['name'] for r in hw_results].index(best_hw['name'])
 
 
 def highlight_best(row):
-    return ['background-color:#0a2a14;color:#3fb950;font-weight:700' if row['Model'] == best_hw['name'] else '' for _ in row]
+    return ['background-color:#dcfce7;color:#14532d;font-weight:700' if row['Model'] == best_hw['name'] else '' for _ in row]
 
 
 st.dataframe(hw_df.style.apply(highlight_best, axis=1), use_container_width=True, hide_index=True)
@@ -873,7 +925,7 @@ st.divider()
 # ══════════════════════════════════════════════════════════════════════════════
 # SECTION 5 — SARIMA
 # ══════════════════════════════════════════════════════════════════════════════
-st.markdown('<div class="section-hdr">⑤ ARIMA / SARIMA</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-hdr"><span class="sec-num">⑤</span> ARIMA / SARIMA</div>', unsafe_allow_html=True)
 
 with st.spinner("Đang kiểm định tính dừng (ADF test)..."):
     d, D, adf_info = determine_d_D(series, period)
@@ -939,7 +991,7 @@ Chuỗi dừng là chuỗi có <b>trung bình, phương sai và tự tương qua
 """, unsafe_allow_html=True)
 
 # ── ACF & PACF plots ───────────────────────────────────────────────────────
-st.markdown('<div class="section-hdr" style="margin-top:1rem;">ACF & PACF — TỰ TƯƠNG QUAN</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-hdr" style="margin-top:1rem;"><span class="sec-num">⑤·₂</span> ACF & PACF — TỰ TƯƠNG QUAN</div>', unsafe_allow_html=True)
 
 # Choose the differenced series for ACF/PACF (same as used for SARIMA)
 if D > 0:
@@ -1039,7 +1091,7 @@ else:
 
     def highlight_best_sarima(row):
         is_best = row['order (p,d,q)'] == str(best_sarima['order']) and row['seasonal_order (P,D,Q,s)'] == str(best_sarima['seasonal_order'])
-        return ['background-color:#0a2a14;color:#3fb950;font-weight:700' if is_best else '' for _ in row]
+        return ['background-color:#dcfce7;color:#14532d;font-weight:700' if is_best else '' for _ in row]
 
     st.dataframe(sarima_table.style.apply(highlight_best_sarima, axis=1), use_container_width=True, hide_index=True)
 
@@ -1085,7 +1137,7 @@ st.divider()
 # ══════════════════════════════════════════════════════════════════════════════
 # SECTION 6 — BACKTEST: HOLT-WINTERS vs SARIMA
 # ══════════════════════════════════════════════════════════════════════════════
-st.markdown('<div class="section-hdr">⑥ BACKTEST: SO SÁNH HOLT-WINTERS vs SARIMA</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-hdr"><span class="sec-num">⑥</span> BACKTEST: SO SÁNH HOLT-WINTERS vs SARIMA</div>', unsafe_allow_html=True)
 
 if len(series) <= test_size + period:
     st.markdown('<div class="warn-box">⚠️ Chuỗi quá ngắn so với kích thước Test set đã chọn — bỏ qua backtest.</div>', unsafe_allow_html=True)
@@ -1167,7 +1219,7 @@ other_numeric = [c for c in df.columns if c not in (date_col, value_col) and pd.
 reg_forecast = None
 reg_mse = None
 if other_numeric:
-    st.markdown('<div class="section-hdr">⑦ DỰ BÁO HỒI QUY ĐA BIẾN (TÙY CHỌN)</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-hdr"><span class="sec-num">⑦</span> DỰ BÁO HỒI QUY ĐA BIẾN (TÙY CHỌN)</div>', unsafe_allow_html=True)
     st.markdown(f"""
     <div class="info-box">
     File này có các cột số khác: {', '.join(f'<code>{c}</code>' for c in other_numeric)}.
@@ -1267,7 +1319,7 @@ if other_numeric:
 # ══════════════════════════════════════════════════════════════════════════════
 # SECTION 8 — FINAL RECOMMENDATION
 # ══════════════════════════════════════════════════════════════════════════════
-st.markdown('<div class="section-hdr">⑧ 🎯 KHUYẾN NGHỊ CUỐI CÙNG</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-hdr"><span class="sec-num">⑧</span> 🎯 KHUYẾN NGHỊ CUỐI CÙNG</div>', unsafe_allow_html=True)
 
 candidates = []
 if hw_bt_ok and not np.isnan(hw_test_mse):
@@ -1342,7 +1394,7 @@ st.divider()
 # ══════════════════════════════════════════════════════════════════════════════
 # SECTION 9 — EXPORT
 # ══════════════════════════════════════════════════════════════════════════════
-st.markdown('<div class="section-hdr">⑨ XUẤT KẾT QUẢ EXCEL</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-hdr"><span class="sec-num">⑨</span> XUẤT KẾT QUẢ EXCEL</div>', unsafe_allow_html=True)
 
 excel_bytes = export_results_excel(
     series, hw_results, best_hw, sarima_results if sarima_ok else [], best_sarima_res,
