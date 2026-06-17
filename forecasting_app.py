@@ -323,6 +323,7 @@ def show_fig(fig):
 @st.cache_data(show_spinner=False)
 def run_decompositions(series, period):
     out = {}
+    series_mean = float(series.mean())
     for mode in ['additive', 'multiplicative']:
         if mode == 'multiplicative' and (series <= 0).any():
             out[mode] = {'status': 'skip', 'reason': 'Chuỗi có giá trị ≤ 0, không áp dụng được mô hình nhân.'}
@@ -330,11 +331,20 @@ def run_decompositions(series, period):
         try:
             res = seasonal_decompose(series, model=mode, period=period, extrapolate_trend='freq')
             resid = res.resid.dropna()
+            resid_mse_raw = float((resid ** 2).mean())
+            resid_std = float(resid.std())
+            # Additive residuals are absolute (centered at 0); multiplicative residuals are
+            # ratios (centered at 1). Raw MSE is therefore NOT comparable across the two modes.
+            # We normalize both to a "% of series level" scale for a fair comparison:
+            #   additive:        resid_std / mean(series)
+            #   multiplicative:  resid_std  (already a ratio, ~fraction of level)
+            norm_resid_pct = (resid_std / series_mean * 100) if mode == 'additive' else (resid_std * 100)
             out[mode] = {
                 'status': 'ok',
                 'trend': res.trend, 'seasonal': res.seasonal, 'resid': res.resid,
-                'resid_mse': float((resid ** 2).mean()),
-                'resid_std': float(resid.std()),
+                'resid_mse': resid_mse_raw,
+                'resid_std': resid_std,
+                'resid_pct': norm_resid_pct,
             }
         except Exception as e:
             out[mode] = {'status': 'error', 'reason': str(e)}
@@ -655,19 +665,23 @@ else:
             style_ax(axes[2], 'Residual', 'Thời gian', '')
             fig.tight_layout()
             show_fig(fig)
-            st.caption(f"Residual MSE = **{d['resid_mse']:,.4f}** · Residual Std = **{d['resid_std']:,.4f}**")
+            st.caption(f"Phần dư ≈ **{d['resid_pct']:.2f}%** so với mức trung bình của chuỗi (Residual MSE thô = {d['resid_mse']:,.4g}, không so sánh trực tiếp giữa 2 mô hình)")
     if decomp['multiplicative']['status'] != 'ok':
         st.markdown(f'<div class="warn-box">ℹ️ Mô hình nhân không khả dụng: {decomp["multiplicative"]["reason"]}</div>', unsafe_allow_html=True)
 
     if len(valid_modes) == 2:
-        rec = 'multiplicative' if decomp['multiplicative']['resid_mse'] < decomp['additive']['resid_mse'] else 'additive'
+        rec = 'multiplicative' if decomp['multiplicative']['resid_pct'] < decomp['additive']['resid_pct'] else 'additive'
         rec_vn = 'nhân (multiplicative)' if rec == 'multiplicative' else 'cộng (additive)'
         st.markdown(f"""
         <div class="interpret-box">
-        🧩 <b>Phân tích:</b> Residual MSE của mô hình cộng = <b>{decomp['additive']['resid_mse']:,.4f}</b>,
-        mô hình nhân = <b>{decomp['multiplicative']['resid_mse']:,.4f}</b>.
-        Mô hình <b>{rec_vn}</b> cho phần dư nhỏ hơn → đây là dạng phân rã <b>phù hợp hơn</b> với chuỗi {value_col}.
+        🧩 <b>Phân tích:</b> Phần dư mô hình cộng ≈ <b>{decomp['additive']['resid_pct']:.2f}%</b> so với mức trung bình chuỗi,
+        mô hình nhân ≈ <b>{decomp['multiplicative']['resid_pct']:.2f}%</b>.
+        (Lưu ý: Residual MSE thô của 2 mô hình nằm trên thang đo khác nhau — phần dư cộng là giá trị tuyệt đối quanh 0,
+        còn phần dư nhân là tỷ số quanh 1 — nên không thể so sánh trực tiếp Residual MSE thô; ở đây đã chuẩn hoá về
+        cùng đơn vị % để so sánh công bằng.)
+        Mô hình <b>{rec_vn}</b> cho phần dư (đã chuẩn hoá) nhỏ hơn → đây là dạng phân rã <b>phù hợp hơn</b> với chuỗi {value_col}.
         Nếu biên độ dao động mùa vụ <b>tăng theo mức độ của xu hướng</b>, mô hình nhân thường phù hợp hơn;
+
         nếu biên độ mùa vụ ổn định, mô hình cộng phù hợp hơn — điều này sẽ được dùng để gợi ý lựa chọn
         mô hình San bằng số mũ ở phần tiếp theo.
         </div>
