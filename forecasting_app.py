@@ -212,18 +212,80 @@ def _load_data_core(file_bytes: bytes, file_name: str, chosen_sheet=None):
     return df, header_row
 
 
+def _score_sheet(file_bytes: bytes, file_name: str, sheet: str) -> float:
+    """Score a sheet 0–100: higher = more likely to be a usable time-series sheet.
+    Criteria: has a parseable date column, has numeric columns, has enough rows.
+    Sheets that look like 'guide/instruction' pages score near 0."""
+    try:
+        result = _load_data_core(file_bytes, file_name, sheet)
+        if result[0] is None:
+            return 0.0
+        df, _ = result
+        if df is None or df.empty or len(df) < 4:
+            return 0.0
+        # Penalty: if most cells are text / NaN → guide sheet
+        total_cells = df.size
+        non_null = df.notna().sum().sum()
+        fill_ratio = non_null / max(total_cells, 1)
+        if fill_ratio < 0.3:
+            return 0.0
+        # Check for at least one date-parseable column
+        date_score = 0.0
+        for col in df.columns:
+            try:
+                parsed = pd.to_datetime(df[col], errors='coerce')
+                ratio = parsed.notna().sum() / max(len(df), 1)
+                if ratio > 0.7:
+                    date_score = ratio
+                    break
+            except Exception:
+                pass
+        if date_score == 0:
+            return 0.0
+        # Count numeric columns (excluding the date col)
+        num_cols = sum(
+            1 for col in df.columns
+            if pd.api.types.is_numeric_dtype(df[col])
+            and df[col].notna().sum() / max(len(df), 1) > 0.5
+        )
+        score = date_score * 40 + min(num_cols, 5) * 10 + min(len(df) / 10, 2) * 5
+        return float(score)
+    except Exception:
+        return 0.0
+
+
 def load_data(uploaded_file):
     name = uploaded_file.name.lower()
     file_bytes = uploaded_file.read()
     chosen_sheet = None
-    sheet_names = []
     if name.endswith((".xlsx", ".xls")):
         xf = pd.ExcelFile(io.BytesIO(file_bytes))
         sheet_names = xf.sheet_names
-        if len(sheet_names) > 1:
-            chosen_sheet = st.sidebar.selectbox("📑 Sheet", sheet_names)
-        else:
+        if len(sheet_names) == 1:
             chosen_sheet = sheet_names[0]
+        else:
+            # Auto-detect best sheet by scoring
+            scores = {s: _score_sheet(file_bytes, uploaded_file.name, s) for s in sheet_names}
+            best_sheet = max(scores, key=lambda s: scores[s])
+            # Show selectbox with the best sheet pre-selected
+            best_idx = sheet_names.index(best_sheet)
+            chosen_sheet = st.sidebar.selectbox(
+                "📑 Sheet",
+                sheet_names,
+                index=best_idx,
+                help=f"Sheet được tự động chọn: '{best_sheet}' (điểm phù hợp cao nhất). Bạn có thể chọn lại thủ công.",
+            )
+            # Show info if auto-selected sheet differs from first
+            if best_idx != 0:
+                skipped = [s for s in sheet_names if scores[s] == 0]
+                if skipped:
+                    st.sidebar.markdown(
+                        f'<div style="font-size:0.76rem;color:#9a6700;background:#fffbeb;'
+                        f'border:1px solid #d97706;border-radius:6px;padding:0.4rem 0.6rem;margin-top:0.3rem;">'
+                        f'⚡ Tự động bỏ qua sheet <b>{", ".join(skipped)}</b> (không có dữ liệu chuỗi thời gian).'
+                        f'</div>',
+                        unsafe_allow_html=True,
+                    )
     result = _load_data_core(file_bytes, uploaded_file.name, chosen_sheet)
     if result[0] is None:
         st.error("Không hỗ trợ định dạng file này.")
