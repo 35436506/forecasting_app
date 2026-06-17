@@ -24,7 +24,7 @@ sm, seasonal_decompose, ExponentialSmoothing, adfuller, mean_squared_error, plt 
 # ── Page config ───────────────────────────────────────────────────────────────
 st.set_page_config(
     page_title="Forecasting Analyst",
-    page_icon="📉",
+    page_icon="📈",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -546,7 +546,7 @@ def export_results_excel(series, hw_results, best_hw, sarima_results, best_sarim
 # UI — HEADER & SIDEBAR
 # ══════════════════════════════════════════════════════════════════════════════
 
-st.markdown('<div class="hero-title">📉 Forecasting Analyst</div>', unsafe_allow_html=True)
+st.markdown('<div class="hero-title">📈 Forecasting Analyst</div>', unsafe_allow_html=True)
 st.markdown('<div class="hero-sub">Tải lên một file Excel/CSV chứa chuỗi thời gian — app sẽ tự phân rã, '
              'tìm mô hình San bằng số mũ (Holt-Winters) và SARIMA tốt nhất, kiểm định bằng backtest, '
              'và đưa ra dự báo kèm phân tích.</div>', unsafe_allow_html=True)
@@ -554,6 +554,68 @@ st.markdown('<div class="hero-sub">Tải lên một file Excel/CSV chứa chuỗ
 with st.sidebar:
     st.markdown('<div class="section-hdr">① TẢI DỮ LIỆU</div>', unsafe_allow_html=True)
     uploaded_file = st.file_uploader("Chọn file Excel hoặc CSV", type=["xlsx", "xls", "csv"])
+
+    # ── Sample data downloads ───────────────────────────────────────────────
+    with st.expander("📂 Tải file dữ liệu mẫu"):
+        st.markdown("**📦 Dữ liệu mẫu theo phương pháp**")
+
+        SAMPLE_FILES = [
+            # (label, path, filename, mime)
+            ("🏠 Doanh số đồ gia dụng (Additive)",
+             "/mnt/user-data/uploads/01_Doanh_so_do_gia_dung_Additive.xlsx",
+             "Doanh_so_do_gia_dung_Additive.xlsx",
+             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),
+            ("⚡ Sản lượng điện (Multiplicative)",
+             "/mnt/user-data/uploads/02_San_luong_dien_Multiplicative.xlsx",
+             "San_luong_dien_Multiplicative.xlsx",
+             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),
+            ("🏢 Giá thuê văn phòng (Regression)",
+             "/mnt/user-data/uploads/03_Gia_thue_van_phong_Regression.xlsx",
+             "Gia_thue_van_phong_Regression.xlsx",
+             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),
+            ("✈️ Khách du lịch – có COVID (Dữ liệu xáo trộn)",
+             "/mnt/user-data/uploads/04_Khach_du_lich_Messy_COVID.xlsx",
+             "Khach_du_lich_Messy_COVID.xlsx",
+             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),
+        ]
+        for label, fpath, fname, mime in SAMPLE_FILES:
+            try:
+                with open(fpath, "rb") as f:
+                    st.download_button(label=label, data=f.read(), file_name=fname,
+                                       mime=mime, use_container_width=True, key=f"dl_{fname}")
+            except Exception:
+                st.caption(f"⚠ Không tìm thấy: {fname}")
+
+        st.markdown("**🌍 Dữ liệu quốc tế (CSV)**")
+        CSV_FILES = [
+            ("🛫 Air Passengers – Hành khách hàng không (Box-Jenkins kinh điển)",
+             "/mnt/user-data/uploads/AirPassengers.csv",
+             "AirPassengers.csv"),
+            ("🌡️ Daily Min Temperatures – Nhiệt độ tối thiểu hàng ngày (Melbourne)",
+             "/mnt/user-data/uploads/daily-min-temperatures.csv",
+             "daily-min-temperatures.csv"),
+        ]
+        for label, fpath, fname in CSV_FILES:
+            try:
+                with open(fpath, "rb") as f:
+                    st.download_button(label=label, data=f.read(), file_name=fname,
+                                       mime="text/csv", use_container_width=True, key=f"dl_{fname}")
+            except Exception:
+                st.caption(f"⚠ Không tìm thấy: {fname}")
+
+        st.markdown("**📊 Dữ liệu hồi quy đa biến**")
+        try:
+            with open("/mnt/user-data/uploads/Time_Series_Regression_Dataset.xlsx", "rb") as f:
+                st.download_button(
+                    label="📈 Time Series Regression Dataset (nhiều biến X)",
+                    data=f.read(),
+                    file_name="Time_Series_Regression_Dataset.xlsx",
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    use_container_width=True,
+                    key="dl_regression",
+                )
+        except Exception:
+            st.caption("⚠ Không tìm thấy file hồi quy đa biến.")
 
 if uploaded_file is None:
     st.markdown("""
@@ -595,7 +657,20 @@ with st.sidebar:
     horizon = st.number_input("Số kỳ dự báo (horizon)", min_value=1, max_value=60, value=int(period))
     test_size = st.number_input("Số kỳ giữ lại để Backtest (Test set)", min_value=2, max_value=60, value=int(period))
     freq = st.selectbox("Tần suất (freq)", ['MS', 'M', 'QS', 'Q', 'W', 'D', 'AS'],
-                         index=['MS', 'M', 'QS', 'Q', 'W', 'D', 'AS'].index(auto_freq) if auto_freq in ['MS', 'M', 'QS', 'Q', 'W', 'D', 'AS'] else 0)
+                         index=['MS', 'M', 'QS', 'Q', 'W', 'D', 'AS'].index(auto_freq) if auto_freq in ['MS', 'M', 'QS', 'Q', 'W', 'D', 'AS'] else 0,
+                         help="Tần suất của chuỗi thời gian — ảnh hưởng đến cách tạo trục thời gian trong dự báo.")
+    st.markdown("""
+    <div style="background:#111827;border:1px solid #30363d;border-radius:8px;padding:0.7rem 0.9rem;font-size:0.78rem;color:#8b949e;margin-top:0.3rem;">
+    <b style="color:#58a6ff;">Giải thích viết tắt Freq:</b><br>
+    <b style="color:#e6edf3;">MS</b> — Month Start: đầu mỗi tháng (phổ biến nhất)<br>
+    <b style="color:#e6edf3;">M</b> &nbsp;— Month End: cuối mỗi tháng<br>
+    <b style="color:#e6edf3;">QS</b> — Quarter Start: đầu mỗi quý (Q1=T1, Q2=T4...)<br>
+    <b style="color:#e6edf3;">Q</b> &nbsp;— Quarter End: cuối mỗi quý<br>
+    <b style="color:#e6edf3;">W</b> &nbsp;— Weekly: mỗi tuần (chủ nhật)<br>
+    <b style="color:#e6edf3;">D</b> &nbsp;— Daily: mỗi ngày<br>
+    <b style="color:#e6edf3;">AS</b> — Annual Start: đầu mỗi năm
+    </div>
+    """, unsafe_allow_html=True)
 
 # try to attach a regular frequency to the index (helps statsmodels avoid warnings)
 series = series_raw.copy()
@@ -840,6 +915,110 @@ else:
     style_ax(axes, 'Dữ liệu gốc (đã dừng)', '', '')
 fig.tight_layout()
 show_fig(fig)
+
+# ── ADF Test explanation box ───────────────────────────────────────────────
+st.markdown(f"""
+<div class="interpret-box">
+🔬 <b>Kiểm định ADF (Augmented Dickey-Fuller) là gì?</b><br><br>
+ADF kiểm tra xem chuỗi thời gian có <b>tính dừng</b> (stationary) hay không.
+Chuỗi dừng là chuỗi có <b>trung bình, phương sai và tự tương quan không thay đổi theo thời gian</b> —
+đây là điều kiện bắt buộc để ARIMA/SARIMA hoạt động đúng.<br><br>
+<b>Đọc kết quả:</b><br>
+• <b>p-value ≤ 0.05</b> → ✅ <b>Chuỗi Dừng</b> — không cần sai phân thêm<br>
+• <b>p-value &gt; 0.05</b> → ❌ <b>Chuỗi Không Dừng</b> — cần lấy sai phân (differencing)<br><br>
+<b>Sai phân là gì?</b><br>
+• <b>Sai phân mùa vụ (lag {period})</b>: lấy <code>y(t) − y(t−{period})</code> để loại bỏ mùa vụ lặp lại
+  → tham số <b>D=1</b> trong SARIMA<br>
+• <b>Sai phân bậc 1</b>: lấy <code>y(t) − y(t−1)</code> để loại bỏ xu hướng
+  → tham số <b>d=1</b> trong SARIMA<br><br>
+<b>Kết quả hiện tại:</b> d = <b>{d}</b>, D = <b>{D}</b>
+{"— Dữ liệu gốc đã dừng, không cần sai phân." if d == 0 and D == 0 else
+ f"— Sau khi sai phân mùa vụ (lag {period}), chuỗi đã dừng." if d == 0 and D == 1 else
+ "— Cần cả sai phân mùa vụ lẫn sai phân bậc 1 để đạt tính dừng."}
+</div>
+""", unsafe_allow_html=True)
+
+# ── ACF & PACF plots ───────────────────────────────────────────────────────
+st.markdown('<div class="section-hdr" style="margin-top:1rem;">ACF & PACF — TỰ TƯƠNG QUAN</div>', unsafe_allow_html=True)
+
+# Choose the differenced series for ACF/PACF (same as used for SARIMA)
+if D > 0:
+    _acf_series = series.diff(period).dropna()
+    if d > 0:
+        _acf_series = _acf_series.diff(1).dropna()
+    _acf_label = f"Chuỗi sau sai phân (d={d}, D={D})"
+else:
+    _acf_series = series.copy()
+    _acf_label = "Dữ liệu gốc"
+
+_nlags = min(40, len(_acf_series) // 2 - 1)
+
+try:
+    from statsmodels.tsa.stattools import acf, pacf
+    from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
+
+    fig_acf, axes_acf = new_fig(1, 2, figsize=(11, 3.5))
+
+    # ACF
+    plot_acf(_acf_series, lags=_nlags, ax=axes_acf[0], color=BLUE, alpha=0.05)
+    axes_acf[0].lines[0].set_color(BLUE)
+    for line in axes_acf[0].lines[1:]:
+        line.set_color(BLUE)
+    axes_acf[0].collections[0].set_facecolor(BLUE)
+    axes_acf[0].collections[0].set_alpha(0.2)
+    style_ax(axes_acf[0], f'ACF — {_acf_label}', 'Lag', 'Tương quan')
+
+    # PACF
+    plot_pacf(_acf_series, lags=_nlags, ax=axes_acf[1], color=PURPLE, alpha=0.05, method='ywm')
+    axes_acf[1].lines[0].set_color(PURPLE)
+    for line in axes_acf[1].lines[1:]:
+        line.set_color(PURPLE)
+    axes_acf[1].collections[0].set_facecolor(PURPLE)
+    axes_acf[1].collections[0].set_alpha(0.2)
+    style_ax(axes_acf[1], f'PACF — {_acf_label}', 'Lag', 'Tương quan riêng phần')
+
+    fig_acf.tight_layout()
+    show_fig(fig_acf)
+
+    # Auto-read insights from ACF/PACF
+    acf_vals = acf(_acf_series, nlags=_nlags, fft=True)
+    pacf_vals = pacf(_acf_series, nlags=_nlags, method='ywm')
+    ci_bound = 1.96 / np.sqrt(len(_acf_series))
+
+    sig_acf_lags = [i for i in range(1, len(acf_vals)) if abs(acf_vals[i]) > ci_bound]
+    sig_pacf_lags = [i for i in range(1, len(pacf_vals)) if abs(pacf_vals[i]) > ci_bound]
+
+    # Detect q hint (ACF cut-off) and p hint (PACF cut-off)
+    acf_cutoff = next((i for i in range(1, len(acf_vals)) if abs(acf_vals[i]) <= ci_bound), None)
+    pacf_cutoff = next((i for i in range(1, len(pacf_vals)) if abs(pacf_vals[i]) <= ci_bound), None)
+
+    seasonal_sig = [l for l in sig_acf_lags if l % period == 0 and l > 0][:3]
+
+    q_hint = min(acf_cutoff - 1, 3) if acf_cutoff and acf_cutoff > 1 else 1
+    p_hint = min(pacf_cutoff - 1, 3) if pacf_cutoff and pacf_cutoff > 1 else 1
+
+    st.markdown(f"""
+    <div class="interpret-box">
+    📊 <b>ACF và PACF là gì?</b><br><br>
+    <b>ACF (Autocorrelation Function)</b> — Tự tương quan: đo xem giá trị tại thời điểm <i>t</i>
+    tương quan bao nhiêu với giá trị tại thời điểm <i>t−k</i> (k = lag). Nếu ACF giảm chậm → chuỗi
+    có xu hướng hoặc chưa dừng. Nếu có spike tại các bội số của {period} → mùa vụ rõ rệt.<br><br>
+    <b>PACF (Partial Autocorrelation Function)</b> — Tự tương quan riêng phần: đo tương quan giữa
+    <i>t</i> và <i>t−k</i> sau khi đã loại bỏ ảnh hưởng của các lag trung gian. PACF giúp xác định
+    bậc AR (<b>p</b>) — số lần "nhìn về quá khứ" của mô hình.<br><br>
+    <b>Vùng tin cậy 95%</b> (đường kẻ ngang): spike vượt ra ngoài vùng này mới có ý nghĩa thống kê.<br><br>
+    <b>🔍 Insights từ dữ liệu hiện tại ({_acf_label}):</b><br>
+    {"• ACF có " + str(len(sig_acf_lags)) + f" lag vượt ngưỡng (±{ci_bound:.2f}): lag " + str(sig_acf_lags[:8])[1:-1] + ("..." if len(sig_acf_lags) > 8 else "") + "<br>" if sig_acf_lags else "• ACF không có lag nào vượt ngưỡng ý nghĩa → chuỗi gần như nhiễu trắng (white noise).<br>"}
+    {"• PACF có " + str(len(sig_pacf_lags)) + f" lag vượt ngưỡng: lag " + str(sig_pacf_lags[:8])[1:-1] + ("..." if len(sig_pacf_lags) > 8 else "") + "<br>" if sig_pacf_lags else "• PACF không có lag nào vượt ngưỡng.<br>"}
+    {"• <b>Mùa vụ rõ qua ACF:</b> spike tại các bội số của " + str(period) + " (lag " + ", ".join(str(l) for l in seasonal_sig) + ") → xác nhận cần thành phần seasonal trong mô hình.<br>" if seasonal_sig else ""}
+    • <b>Gợi ý tham số:</b> PACF cắt tại lag {pacf_cutoff or "?"} → <b>p ≈ {p_hint}</b>;
+      ACF cắt tại lag {acf_cutoff or "?"} → <b>q ≈ {q_hint}</b>.
+      (App đã tự động thử nhiều tổ hợp p, q ở phần SARIMA bên dưới.)
+    </div>
+    """, unsafe_allow_html=True)
+
+except Exception as _acf_err:
+    st.markdown(f'<div class="warn-box">⚠ Không thể vẽ ACF/PACF: {_acf_err}</div>', unsafe_allow_html=True)
 
 with st.spinner("Đang tìm mô hình SARIMA tốt nhất (có thể mất khoảng 30-60 giây)..."):
     sarima_results = sarima_grid_search(series, period, d, D, DEFAULT_SARIMA_CANDIDATES)
