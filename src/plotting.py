@@ -20,7 +20,7 @@ def line_chart(
 ) -> go.Figure:
     """Vẽ nhiều đường trên cùng một biểu đồ. series: {tên: mảng giá trị}."""
     fig = go.Figure()
-    default_colors = [C_DARK, C_GREEN, C_GOLD, C_RED, C_BLUE]
+    default_colors = [C_DARK, C_GREEN, C_GOLD, C_RED, C_BLUE, "#8E44AD", "#16A085"]
     for i, (name, y_values) in enumerate(series.items()):
         color = (colors or {}).get(name, default_colors[i % len(default_colors)])
         is_dashed = (dash or {}).get(name, False)

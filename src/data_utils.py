@@ -79,3 +79,26 @@ def prepare_time_series(df: pd.DataFrame, time_column: str, value_column: str) -
 def month_numbers_from_dates(dates: pd.Series) -> "pd.Series[int]":
     """Trích tháng (1-12) từ cột datetime — dùng cho biến giả mùa vụ."""
     return pd.to_datetime(dates).dt.month
+
+
+def export_comparison_to_excel(sku_label: str, methods: list[str], mapes: list[float],
+                                raw_df: "pd.DataFrame | None" = None,
+                                time_col: str | None = None, value_col: str | None = None) -> bytes:
+    """Xuat bang xep hang phuong phap (va du lieu goc neu co) ra file Excel,
+    tra ve bytes de dua vao st.download_button."""
+    import io as _io
+
+    buf = _io.BytesIO()
+    sorted_pairs = sorted(zip(methods, mapes), key=lambda x: x[1])
+    ranking_df = pd.DataFrame({
+        "Phương pháp": [p[0] for p in sorted_pairs],
+        "MAPE (%)": [round(p[1], 2) for p in sorted_pairs],
+        "Xếp hạng": range(1, len(sorted_pairs) + 1),
+    })
+
+    with pd.ExcelWriter(buf, engine="openpyxl") as writer:
+        ranking_df.to_excel(writer, sheet_name="Bang xep hang", index=False)
+        if raw_df is not None and time_col is not None and value_col is not None:
+            raw_df[[time_col, value_col]].to_excel(writer, sheet_name="Du lieu goc", index=False)
+
+    return buf.getvalue()
