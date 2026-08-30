@@ -2,7 +2,7 @@ import streamlit as st
 import numpy as np
 
 from src.ui_helpers import select_series, show_series_preview
-from src.naive_smoothing import fit_ses, fit_holt, fit_holt_winters
+from src.naive_smoothing import fit_ses, fit_holt, fit_holt_winters, compare_all_holt_winters
 from src.metrics import calculate_metrics
 from src.plotting import line_chart, forecast_chart_with_ci
 from src.app_state import register_method_mape
@@ -78,3 +78,58 @@ if any(v < 0.05 for v in params.values() if isinstance(v, float)):
         "chạy theo quan sát mới, thường xảy ra khi SKU gần như thuần nhiễu ngẫu nhiên (xem Lecture "
         "Notes Chương 3)."
     )
+
+st.divider()
+st.subheader("🧭 So sánh cả 4 tổ hợp Holt-Winters cùng lúc")
+st.caption(
+    "Khớp trực tiếp 4 góc của Ma trận Pegels (Chương 1) — thay vì chọn từng tổ hợp một, xem ngay "
+    "tổ hợp nào có MSE thấp nhất cho đúng SKU đang chọn."
+)
+
+if st.button("🔍 Chạy cả 4 tổ hợp", type="primary"):
+    with st.spinner("Đang fit 4 mô hình Holt-Winters..."):
+        try:
+            combo_season_length = season_length if method == "Holt-Winters" else 12
+            st.session_state["hw4_results"] = compare_all_holt_winters(y, season_length=combo_season_length)
+            st.session_state["hw4_season_length"] = combo_season_length
+        except Exception as error:
+            st.error(f"Không chạy được: {error}")
+
+if "hw4_results" in st.session_state:
+    combo_results = st.session_state["hw4_results"]
+    ok_results = [r for r in combo_results if r["status"] == "ok"]
+
+    if not ok_results:
+        st.warning("Không có tổ hợp nào chạy thành công trên chuỗi này.")
+    else:
+        best = min(ok_results, key=lambda r: r["mse"])
+
+        table_rows = []
+        for r in combo_results:
+            if r["status"] == "ok":
+                table_rows.append({
+                    "Xu hướng + Mùa vụ": r["label"], "MSE": f"{r['mse']:,.1f}",
+                    "": "🏆 Tốt nhất" if r is best else "",
+                })
+            else:
+                table_rows.append({"Xu hướng + Mùa vụ": r["label"], "MSE": "—",
+                                    "": f"⚠ {r.get('reason', 'lỗi')}"})
+        st.dataframe(table_rows, width="stretch", hide_index=True)
+
+        best_r = best["result"]
+        valid_best = ~np.isnan(best_r.fitted)
+        m_best = calculate_metrics(y[valid_best], best_r.fitted[valid_best])
+        register_method_mape(f"Holt-Winters ({best['label']})", m_best.mape, value_col)
+
+        st.success(f"🏆 Tổ hợp tốt nhất: **{best['label']}** — MSE={best['mse']:,.1f}, MAPE={m_best.mape:.2f}%")
+
+        fig_combo = line_chart(
+            df[time_col], {value_col: y, f"Holt-Winters ({best['label']})": best_r.fitted},
+            title=f"Tổ hợp tốt nhất: {best['label']}", xaxis_title="Thời gian", yaxis_title=value_col,
+        )
+        st.plotly_chart(fig_combo, width="stretch")
+
+        st.caption(
+            "💡 Nếu tổ hợp Nhân bị bỏ qua (⚠), nghĩa là chuỗi có giá trị ≤ 0 — mùa vụ Nhân không xác "
+            "định được vì công thức nhân với mức nền."
+        )
